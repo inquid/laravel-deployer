@@ -5,6 +5,14 @@ project_id="$1"
 dockerfile="${2:-8.3.Dockerfile}"
 repo_url="${3:-https://github.com/gogl92/docker-lemp}"
 branch_name="${4:-deployer}"
+root_branch_param="${5}"
+
+# If the root branch is not provided as a parameter, detect the current branch of the root project
+if [ -z "$root_branch_param" ]; then
+  root_branch=$(git rev-parse --abbrev-ref HEAD)
+else
+  root_branch="$root_branch_param"
+fi
 
 # Create the project directory
 mkdir -p "apps/$project_id/"
@@ -45,5 +53,5 @@ docker run --rm \
     laravelsail/php83-composer:latest \
     php /var/www/html/artisan key:generate
 
-# Build the Docker image using the specified Dockerfile
-docker build -t "$project_id" -f "apps/$project_id/$dockerfile" "apps/$project_id"
+# Build the Docker image using the specified Dockerfile and tag it with the root project branch name
+docker build -t "$project_id:$root_branch" -f "apps/$project_id/$dockerfile" "apps/$project_id"
